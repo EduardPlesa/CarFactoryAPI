@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CarFactory.Application/CarFactory.Application.csproj" />
+  <Project Path="CarFactory.Contracts/CarFactory.Contracts.csproj" />
+  <Project Path="CarFactoryAPI/CarFactoryAPI.csproj" />
+</Solution>

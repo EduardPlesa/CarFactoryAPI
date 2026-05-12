@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "TUJhXP130EE=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Eduard\\source\\repos\\CarFactoryAPI\\CarFactory.Application\\CarFactory.Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Eduard\\.nuget\\packages\\docker.dotnet\\3.125.15\\docker.dotnet.3.125.15.nupkg.sha512",
+    "C:\\Users\\Eduard\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.6\\microsoft.extensions.dependencyinjection.10.0.6.nupkg.sha512",
+    "C:\\Users\\Eduard\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.6\\microsoft.extensions.dependencyinjection.abstractions.10.0.6.nupkg.sha512",
+    "C:\\Users\\Eduard\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}
