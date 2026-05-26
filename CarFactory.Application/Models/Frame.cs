@@ -11,7 +11,7 @@ namespace CarFactory.Application.Models
         public required string Name { get; set; }
 
         public string Slug => GenerateSlug();
-        public float weight { get; set; }
+        public float Weight { get; set; }
 
         private string GenerateSlug()
         {

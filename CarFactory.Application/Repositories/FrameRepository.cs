@@ -1,51 +1,130 @@
-﻿using CarFactory.Application.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using CarFactory.Application.Database;
+using CarFactory.Application.Models;
+using Dapper;
+using System.Data;
 
 namespace CarFactory.Application.Repositories
 {
-    internal class FrameRepository : IFrameRepository
+    public class FrameRepository : IFrameRepository
     {
-        private readonly List<Frame> _frames = new();
-        public Task<bool> CreateAsync(Frame frame)
+        private const string FrameSelect = """
+            select
+                id as "Id",
+                name as "Name",
+                slug as "Slug",
+                car_type as "CarType",
+                weight as "Weight"
+            from frames
+            """;
+
+        private readonly IDbConnectionFactory _dbConnectionFactory;
+
+        public FrameRepository(IDbConnectionFactory connectionFactory)
         {
-            _frames.Add(frame);
-            return Task.FromResult(true);
+            _dbConnectionFactory = connectionFactory;
         }
 
-
-        public Task<IEnumerable<Frame>> GetAllAsync()
+        public async Task<bool> CreateAsync(Frame frame)
         {
-           return Task.FromResult(_frames.AsEnumerable());
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var result = await InsertFrameAsync(frame, connection);
+
+            return result > 0;
         }
 
-        public Task<Frame?> GetByIdAsync(Guid id)
+        public async Task<bool> CreateAsync(Frame frame, IDbConnection connection, IDbTransaction transaction)
         {
-            var frame = _frames.SingleOrDefault(x => x.Id == id);
-            return Task.FromResult(frame);
+            var result = await InsertFrameAsync(frame, connection, transaction);
+
+            return result > 0;
         }
 
-        public Task<bool> UpdateAsync(Frame frame)
+        private static async Task<int> InsertFrameAsync(Frame frame, IDbConnection connection, IDbTransaction? transaction = null)
         {
-            var frameIndex = _frames.FindIndex(x => x.Id == frame.Id);
-            if (frameIndex == -1)
-                return Task.FromResult(false);
+            var result = await connection.ExecuteAsync(new CommandDefinition(
+                """
+                insert into frames (id, name, slug, car_type, weight)
+                values (@Id, @Name, @Slug, @CarType, @Weight)
+                """,
+                frame,
+                transaction));
 
-            _frames[frameIndex] = frame;
-            return Task.FromResult(true);
-        }
-        public Task<bool> DeleteByIdAsync(Guid id)
-        {
-            var removedCount = _frames.RemoveAll(x => x.Id == id);
-            var frameRemoved = removedCount > 0;
-            return Task.FromResult(frameRemoved);
+            return result;
         }
 
-        Task<Frame?> IFrameRepository.GetBySlugAsync(string slug)
+        public async Task<Frame?> GetByIdAsync(Guid id)
         {
-            var frame = _frames.SingleOrDefault(x => x.Slug == slug);
-            return Task.FromResult(frame);
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.QuerySingleOrDefaultAsync<Frame>(
+                new CommandDefinition($"""
+                    {FrameSelect}
+                    where id = @Id
+                    """,
+                    new { Id = id }));
+        }
+
+        public async Task<Frame?> GetBySlugAsync(string slug)
+        {
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.QuerySingleOrDefaultAsync<Frame>(
+                new CommandDefinition($"""
+                    {FrameSelect}
+                    where slug = @Slug
+                    """,
+                    new { Slug = slug }));
+        }
+
+        public async Task<IEnumerable<Frame>> GetAllAsync()
+        {
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.QueryAsync<Frame>(new CommandDefinition($"""
+                {FrameSelect}
+                order by name
+                """));
+        }
+
+        public async Task<bool> UpdateAsync(Frame frame)
+        {
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var result = await connection.ExecuteAsync(new CommandDefinition(
+                """
+                update frames
+                set name = @Name,
+                    slug = @Slug,
+                    car_type = @CarType,
+                    weight = @Weight
+                where id = @Id
+                """,
+                frame));
+
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteByIdAsync(Guid id)
+        {
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var result = await connection.ExecuteAsync(new CommandDefinition(
+                """
+                delete from frames
+                where id = @Id
+                """,
+                new { Id = id }));
+
+            return result > 0;
+        }
+
+        public async Task<bool> ExistsByIdAsync(Guid id)
+        {
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                """
+                select exists (
+                    select 1
+                    from frames
+                    where id = @Id
+                )
+                """,
+                new { Id = id }));
         }
     }
 }

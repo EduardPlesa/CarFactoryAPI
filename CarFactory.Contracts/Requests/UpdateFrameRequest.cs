@@ -8,5 +8,6 @@ namespace CarFactory.Contracts.Requests
     {
         public required string CarType { get; set; }
         public required string Name { get; set; }
+        public required float Weight { get; set; }
     }
 }
