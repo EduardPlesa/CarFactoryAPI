@@ -32,7 +32,6 @@ namespace CarFactoryAPI.Mapping
                 Id = id,
                 Name = request.Name,
                 CarType = request.CarType,
-                Weight = request.Weight,
             };
         }
 

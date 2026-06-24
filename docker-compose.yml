@@ -4,32 +4,10 @@ services:
       context: .
       dockerfile: CarFactoryAPI/Dockerfile
     container_name: carfactory-api
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       ASPNETCORE_HTTP_PORTS: 8080
-      Database__ConnectionString: Host=db;Port=5432;Database=carfactory;Username=carfactory;Password=carfactory_dev_password
+      Database__ConnectionString: Host=host.docker.internal;Port=5432;Database=carfactory;Username=carfactory;Password=carfactory_dev_password
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "5019:8080"
-
-  db:
-    image: postgres:16
-    container_name: carfactory-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: carfactory
-      POSTGRES_PASSWORD: carfactory_dev_password
-      POSTGRES_DB: carfactory
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U carfactory -d carfactory"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    ports:
-      - "55432:5432"
-    volumes:
-      - carfactory-postgres-data:/var/lib/postgresql/data
-
-volumes:
-  carfactory-postgres-data:

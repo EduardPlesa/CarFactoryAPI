@@ -91,8 +91,7 @@ namespace CarFactory.Application.Repositories
                 update frames
                 set name = @Name,
                     slug = @Slug,
-                    car_type = @CarType,
-                    weight = @Weight
+                    car_type = @CarType
                 where id = @Id
                 """,
                 frame));
